@@ -1,3 +1,5 @@
+//Author: Zhijie Tan
+//Time： 6/3/2025
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -12,9 +14,7 @@ const int n = 400;
 const int N = 400; 
 int newsin[N][N];
 int newsin2[N][N];
-int result[N][N];  //sin图像
-
-
+int result[N][N];  //Sinogram
 
 const double PI = 3.14159265358979323846;
 
@@ -136,7 +136,7 @@ void improvedBackProjection(int filteredSinogram[N][N], int output[N][N]) {
         }
     }
     
-    // 4. Find min and max for normalization
+    // 4. Find Min and Max for normalization
     int minVal = output[0][0];
     int maxVal = output[0][0];
     
