@@ -1,4 +1,5 @@
-
+//Author: Zhijie Tan
+//Time: 4/3/2025
 #include <iostream>
 #include "Display.h"
 #include <cstring>
@@ -8,35 +9,26 @@
 using namespace std;
 
 const int n = 400;
-
 const int N = 400; // Image Size N x N
-int Pixels[N][N];  //原来的图像
-int tary[N][N];    //旋转后的图像
-
- //重建最终的图像
-int Temp1[N][N];  //临时的图像1：在sinogram得到图像
-int Temp2[N][N];  //临时的图像2：旋转临时图像1
+int Pixels[N][N];  //The original image
 
 const double PI = 3.14159265358979323846;
 
 const int ROWS = N;
 const int COLS = N;
-const int IMAGE_SIZE = 400;     // 图像尺寸 400×400
-const int ANGLE_COUNT = 180;    // 角度数 (0°~179°)
-const int DETECTOR_COUNT = 400; // 探测器数量
-
+const int IMAGE_SIZE = n;     //The image size is 400×400
+const int ANGLE_COUNT = 180;    //Number of angles (0°~179°)
+const int DETECTOR_COUNT = 400; // Number of detectors
 
 double pi = 3.14;
 int dst[N];
-
-
 
 struct Point {
     int x;
     int y;
 };
 
-// ART重建
+// ART Reconstruction
 void ARTReconstruction(
     int measuredProjections[ANGLE_COUNT][DETECTOR_COUNT],
     double image[IMAGE_SIZE][IMAGE_SIZE],
@@ -44,29 +36,29 @@ void ARTReconstruction(
     double lambda0,
     double alpha
 ) {
-    // 1) 初始化图像为常值，防止全零导致更新量过小
+    // Initialize the image as a constant value to prevent the update amount from being too small due to all zeros
     for(int i=0; i<IMAGE_SIZE; i++){
         for(int j=0; j<IMAGE_SIZE; j++){
             image[i][j] = 50.0;
         }
     }
 
-    // 2) 外层迭代循环
+    //The outer iteration loop
     for(int iter = 0; iter < iterations; iter++){
         
-        // 计算当前迭代轮的步长 lambda_k
-        // 公式:  lambda_k = lambda0 / (1 + alpha * iter)
+        // Calculate the step size lambda_k for the current iteration round
+        // Formula:  lambda_k = lambda0 / (1 + alpha * iter)
         double lambda_k = lambda0 / (1.0 + alpha * iter);
 
-        // 遍历所有角度
+        // Iterate over all angles
         for(int angleIndex = 0; angleIndex < ANGLE_COUNT; angleIndex++){
             double angleRad = -angleIndex*(PI/180.0);
             double cosT = cos(angleRad);
             double sinT = sin(angleRad);
 
-            // 遍历所有探测器
+            // Iterate over all detectors
             for(int det = 0; det < DETECTOR_COUNT; det++){
-                // 射线在正交方向上的偏移
+                // The offset of the ray in the orthogonal direction
                 double s = det - DETECTOR_COUNT/2.0;
 
                 // dot(a_i, x) & ||a_i||^2
@@ -75,7 +67,7 @@ void ARTReconstruction(
 
                 vector<Point> rayPixels;
 
-                // 射线积分: 沿 (cosT, sinT) 方向采样
+                //Ray integration: Sample along the (cosT, sinT) direction
                 double maxT = IMAGE_SIZE * 1.5;
                 double step = 0.2;
                 for(double tVal = -maxT; tVal <= maxT; tVal += step){
@@ -85,7 +77,7 @@ void ARTReconstruction(
                     int iY = (int)round(Y);
 
                     if(iX >= 0 && iX < IMAGE_SIZE && iY >= 0 && iY < IMAGE_SIZE){
-                        // 乘以 step 近似积分
+                        // Times the step approximation integral
                         ai_dot_x += image[iX][iY] * step;
                         ai_norm_sq += step;
                         rayPixels.push_back({iX, iY});
@@ -100,36 +92,26 @@ void ARTReconstruction(
                     double diff = bi - ai_dot_x;
                     double correction = lambda_k * (diff / ai_norm_sq);
 
-                    // 对射线上所有像素进行同样的校正
+                    // The same correction is applied to all pixels on the shooting line
                     for(auto &pt : rayPixels){
                         image[pt.x][pt.y] += correction;
                     }
                 }
             } // end for det
         } // end for angle
-
-        
     } // end for iter
 }
 
 
 int main() {
-
-
     int sinogram[n][n] = {0};
-
     ifstream inFile;
-    
-	inFile.open("sinogram_400x400.txt");
-		
+     inFile.open("sinogram_400x400.txt");	
 	for (int row = 0; row < n; row++)
 		for (int col = 0; col < n; col++)
 			inFile >> sinogram[row][col];
 	
 	inFile.close();
-
-
-    
 
     int Pixels[n][n] = {0};
     
