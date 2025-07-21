@@ -1,0 +1,39 @@
+var tot_com = wid*hig*com; //:total#components
+var u8a     = new Uint8Array( tot_com );
+
+DrawDebugPattern  ( u8a , wid, hig              );
+Uint8ArrayToCanvas( u8a , wid, hig, "CANVAS_ID" );
+
+function Uint8ArrayToCanvas( 
+    u8a, //:uint8Array
+    wid, //:width__of_u8a_data_in_pixels
+    hig, //:height_of_u8a_data_in_pixels
+    nam, //:name_id_of_canvas_on_dom
+){
+
+    //:Get Canvas:
+    var can = document.getElementById( nam );
+    if(!can){ throw "[FailedToGetCanvas]"; }
+
+    //:Get Canvas's 2D Context:
+    var ctx = can.getContext("2d");
+    if(!ctx){ throw "[FailedToGetContext]"; }
+
+    //:Use U8A to create image data object:    
+    var UAC = new Uint8ClampedArray( u8a,wid,hig);
+    var DAT = new ImageData(UAC, wid, hig);
+
+    //:Paste Data Into Canvas:     
+    var ORG_X = 0;                         
+    var ORG_Y = 0;                         
+    ctx.putImageData( DAT, ORG_X, ORG_Y );  
+}
+
+function DrawDebugPattern(u8a,wid,hig){
+
+    var com     = 4      ; //:RGBA==4components.
+    var tot_pix = wid*hig; //:total#pixels
+
+    //:Make a pattern on array:    
+    var ci  = 0; //:Component_Index
+    var pi  = 0; //:Pixel_Index
